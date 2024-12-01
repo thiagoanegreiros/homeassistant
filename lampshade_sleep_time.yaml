@@ -1,0 +1,21 @@
+dormir_lampada_template:
+  alias: "Abajur Modo Dormir - Template"
+  description: "Liga uma lâmpada com brilho e cor configuráveis para o modo dormir."
+  fields:
+    lampada:
+      description: "ID da lâmpada"
+      example: light.sua_lampada
+    brilho:
+      description: "Brilho da lâmpada (0-100%)"
+      example: 1
+    temperatura_cor:
+      description: "Temperatura de cor (mireds)"
+      example: 450
+  sequence:
+    - service: light.turn_on
+      target:
+        entity_id: "{{ lampada }}"
+      data:
+        brightness_pct: "{{ brilho }}"
+        color_temp: "{{ temperatura_cor }}"
+  mode: single
