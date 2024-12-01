@@ -1,5 +1,5 @@
 blueprint:
-  name: Exemplo de Blueprint
+  name: Liga uma luz no modo de dormir
   description: Liga uma luz no modo de dormir
   domain: script
   input:
