@@ -8,9 +8,7 @@ blueprint:
       selector:
         entity:
           domain: light
-trigger:
-  - platform: time
-    at: "22:00:00"
+          multiple: true
 action:
   - service: light.turn_on
     target:
