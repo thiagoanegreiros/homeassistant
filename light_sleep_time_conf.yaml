@@ -5,6 +5,7 @@ blueprint:
   input:
     lampada:
       name: Lâmpada
+      description: Qual lâmpada será configurada.
       selector:
         entity:
           domain: light
