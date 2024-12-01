@@ -9,6 +9,10 @@ blueprint:
         entity:
           domain: light
           multiple: true
+trigger:
+  platform: state
+  entity_id: !input entrada_switchs
+
 action:
   - service: light.turn_on
     target:
