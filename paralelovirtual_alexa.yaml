@@ -46,16 +46,26 @@ action:
       seconds: 0
       milliseconds: 500
 
-  - service: media_player.play_media
-    data:
-      media_content_type: routine
-      media_content_id: >
-        {% if trigger.to_state.state == "on" %}
-          {{ input_rotina_on }}
-        {% elif trigger.to_state.state == "off" %}
-          {{ input_rotina_off }}
-        {% endif %}
-    target:
-      entity_id: !input alexa_device
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.state == 'on' }}"
+        sequence:
+          - service: media_player.play_media
+            data:
+              media_content_type: routine
+              media_content_id: !input rotina_on
+            target:
+              entity_id: !input alexa_device
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.to_state.state == 'off' }}"
+        sequence:
+          - service: media_player.play_media
+            data:
+              media_content_type: routine
+              media_content_id: !input rotina_off
+            target:
+              entity_id: !input alexa_device
 
 mode: single
