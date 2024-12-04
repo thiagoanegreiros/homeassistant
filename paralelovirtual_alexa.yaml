@@ -51,9 +51,9 @@ action:
       media_content_type: routine
       media_content_id: >
         {% if trigger.to_state.state == "on" %}
-          {{ rotina_on }}
+          {{ input_rotina_on }}
         {% elif trigger.to_state.state == "off" %}
-          {{ rotina_off }}
+          {{ input_rotina_off }}
         {% endif %}
     target:
       entity_id: !input alexa_device
