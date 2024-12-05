@@ -77,7 +77,7 @@ action:
             entity_id: !input is_indirect
             state: "on"
           - condition: template
-            value_template: "{{ !input.indirect_light != '' }}"
+            value_template: "{{ indirect_light is not none and indirect_light != '' }}"
         sequence:
           - service: light.turn_on
             target:
@@ -99,7 +99,7 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ !input.indirect_light != '' }}"
+            value_template: "{{ indirect_light is not none and indirect_light != '' }}"
         sequence:
           - service: light.turn_off
             target:
