@@ -73,16 +73,19 @@ condition:
 action:
   - choose:
       - conditions:
+          # Verifica se `is_indirect` está ativo
           - condition: state
             entity_id: !input is_indirect
             state: "on"
+          # Verifica se `indirect_light` está definido e não está vazio
           - condition: template
-            value_template: "{{ indirect_light is not none and indirect_light != '' }}"
+            value_template: "{{ '!input indirect_light' != '' }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input indirect_light
       - conditions:
+          # Verifica se `is_indirect` está desativado
           - condition: state
             entity_id: !input is_indirect
             state: "off"
@@ -98,8 +101,9 @@ action:
     continue_on_timeout: true
   - choose:
       - conditions:
+          # Verifica se `indirect_light` está configurado
           - condition: template
-            value_template: "{{ indirect_light is not none and indirect_light != '' }}"
+            value_template: "{{ '!input indirect_light' != '' }}"
         sequence:
           - service: light.turn_off
             target:
