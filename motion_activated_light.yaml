@@ -39,6 +39,8 @@ blueprint:
       selector:
         entity:
           domain: light
+          multiple: false
+          include_empty: true
     is_indirect:
       name: Indirect Light Active
       description: The variable that determines which light to turn on.
@@ -75,15 +77,12 @@ action:
           - condition: state
             entity_id: !input is_indirect
             state: "on"
+          - condition: template
+            value_template: "{{ indirect_light != '' }}"
         sequence:
-          - choose:
-              - conditions:
-                  - condition: template
-                    value_template: "{{ indirect_light and indirect_light != '' }}"
-                sequence:
-                  - service: light.turn_on
-                    target:
-                      entity_id: !input indirect_light
+          - service: light.turn_on
+            target:
+              entity_id: !input indirect_light
       - conditions:
           - condition: state
             entity_id: !input is_indirect
@@ -101,7 +100,7 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ indirect_light and indirect_light != '' }}"
+            value_template: "{{ indirect_light != '' }}"
         sequence:
           - service: light.turn_off
             target:
