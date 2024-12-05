@@ -1,5 +1,5 @@
 blueprint:
-  name: Custom Motion Activated Light
+  name: Custom Motion Direct and Indirect lights
   description: >
     Turns on a direct light if motion is detected and the illumination level is below a defined threshold. Optionally turns on an indirect light if `is_indirect` is true. Turns off the lights after no motion is detected for a set duration.
   domain: automation

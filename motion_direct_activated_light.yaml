@@ -1,0 +1,80 @@
+blueprint:
+  name: Custom Motion Direct Light Only
+  description: >
+    Turns on a direct light if motion is detected and the illumination level is below a defined threshold, unless `is_indirect` (e.g., sleep_time) is active. Turns off the light after no motion is detected for a set duration.
+  domain: automation
+  input:
+    motion_sensor:
+      name: Motion Sensor
+      description: The motion sensor to trigger the light.
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    lux_sensor:
+      name: Lux Sensor
+      description: The sensor to measure illumination level for the light.
+      selector:
+        entity:
+          domain: sensor
+    lux_threshold:
+      name: Lux Threshold
+      description: The maximum illumination level to allow the light to turn on.
+      default: 100
+      selector:
+        number:
+          min: 0
+          max: 1000
+          unit_of_measurement: lux
+    direct_light:
+      name: Direct Light
+      description: The light to control (based on motion and lux level).
+      selector:
+        entity:
+          domain: light
+    is_indirect:
+      name: Indirect Light Active (e.g., Sleep Time)
+      description: The variable that prevents the light from turning on if active.
+      default: input_boolean.sleep_time
+      selector:
+        entity:
+          domain: input_boolean
+    no_motion_wait:
+      name: Wait time for no motion
+      description: Duration to wait before turning off the light after no motion is detected.
+      default: 120
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: seconds
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: state
+    entity_id: !input motion_sensor
+    to: "on"
+
+condition:
+  - condition: numeric_state
+    entity_id: !input lux_sensor
+    below: !input lux_threshold
+  - condition: state
+    entity_id: !input is_indirect
+    state: "off"  # Garante que a luz só liga se `is_indirect` estiver desativado
+
+action:
+  - service: light.turn_on
+    target:
+      entity_id: !input direct_light
+  - wait_for_trigger:
+      - platform: state
+        entity_id: !input motion_sensor
+        to: "off"
+    timeout: !input no_motion_wait
+    continue_on_timeout: true
+  - service: light.turn_off
+    target:
+      entity_id: !input direct_light
