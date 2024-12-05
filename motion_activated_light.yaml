@@ -1,0 +1,112 @@
+blueprint:
+  name: Custom Motion Activated Light
+  description: >
+    Turns on a direct light if motion is detected and the illumination level is below a defined threshold. Optionally turns on an indirect light if `is_indirect` is true. Turns off the lights after no motion is detected for a set duration.
+  domain: automation
+  input:
+    motion_sensor:
+      name: Motion Sensor
+      description: The motion sensor to trigger the light.
+      selector:
+        entity:
+          domain: binary_sensor
+          device_class: motion
+    lux_sensor:
+      name: Lux Sensor
+      description: The sensor to measure illumination level for direct light.
+      selector:
+        entity:
+          domain: sensor
+    lux_threshold:
+      name: Lux Threshold
+      description: The maximum illumination level to allow the direct light to turn on.
+      default: 100
+      selector:
+        number:
+          min: 0
+          max: 1000
+          unit_of_measurement: lux
+    direct_light:
+      name: Direct Light
+      description: The direct light to control (based on motion and lux level).
+      selector:
+        entity:
+          domain: light
+    indirect_light:
+      name: Indirect Light (Optional)
+      description: The indirect light to control (based on is_indirect).
+      default: ""
+      selector:
+        entity:
+          domain: light
+          optional: true
+    is_indirect:
+      name: Indirect Light Active
+      description: The variable that determines which light to turn on.
+      default: input_boolean.sleep_time
+      selector:
+        entity:
+          domain: input_boolean
+    no_motion_wait:
+      name: Wait time for no motion
+      description: Duration to wait before turning off the lights after no motion is detected.
+      default: 120
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: seconds
+
+mode: restart
+max_exceeded: silent
+
+trigger:
+  - platform: state
+    entity_id: !input motion_sensor
+    to: "on"
+
+condition:
+  - condition: numeric_state
+    entity_id: !input lux_sensor
+    below: !input lux_threshold
+
+action:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: !input is_indirect
+            state: "on"
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ !input.indirect_light != '' }}"
+                sequence:
+                  - service: light.turn_on
+                    target:
+                      entity_id: !input indirect_light
+      - conditions:
+          - condition: state
+            entity_id: !input is_indirect
+            state: "off"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input direct_light
+  - wait_for_trigger:
+      - platform: state
+        entity_id: !input motion_sensor
+        to: "off"
+    timeout: !input no_motion_wait
+    continue_on_timeout: true
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ !input.indirect_light != '' }}"
+        sequence:
+          - service: light.turn_off
+            target:
+              entity_id: !input indirect_light
+  - service: light.turn_off
+    target:
+      entity_id: !input direct_light
