@@ -39,7 +39,6 @@ blueprint:
       selector:
         entity:
           domain: light
-          optional: true
     is_indirect:
       name: Indirect Light Active
       description: The variable that determines which light to turn on.
