@@ -1,7 +1,7 @@
 blueprint:
   name: Custom Motion Direct and Indirect Lights
   description: >
-    Turns on a direct light if motion is detected and the illumination level is below a defined threshold. Always turns on an indirect light if `is_indirect` is active. Turns off the lights after no motion is detected for a set duration.
+    Turns on a direct light if motion is detected and the illumination level is below a defined threshold. Only turns on the indirect light if `is_indirect` is active. Turns off the lights after no motion is detected for a set duration.
   domain: automation
   input:
     motion_sensor:
@@ -78,9 +78,7 @@ action:
         sequence:
           - service: light.turn_on
             target:
-              entity_id: 
-                - !input direct_light
-                - !input indirect_light
+              entity_id: !input indirect_light
       - conditions:
           # Verifica se `is_indirect` está desativado
           - condition: state
