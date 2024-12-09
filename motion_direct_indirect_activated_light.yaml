@@ -1,7 +1,7 @@
 blueprint:
-  name: Custom Motion Direct and Indirect lights
+  name: Custom Motion Direct and Indirect Lights
   description: >
-    Turns on a direct light if motion is detected and the illumination level is below a defined threshold. Optionally turns on an indirect light if `is_indirect` is true. Turns off the lights after no motion is detected for a set duration.
+    Turns on a direct light if motion is detected and the illumination level is below a defined threshold. Always turns on an indirect light if `is_indirect` is active. Turns off the lights after no motion is detected for a set duration.
   domain: automation
   input:
     motion_sensor:
@@ -33,16 +33,14 @@ blueprint:
         entity:
           domain: light
     indirect_light:
-      name: Indirect Light (Optional)
-      description: The indirect light to control (based on is_indirect).
-      default: ""
+      name: Indirect Light
+      description: The indirect light to control (based on `is_indirect`).
       selector:
         entity:
           domain: light
-          multiple: false
     is_indirect:
       name: Indirect Light Active
-      description: The variable that determines which light to turn on.
+      description: The variable that determines whether to turn on the indirect light.
       default: input_boolean.sleep_time
       selector:
         entity:
@@ -77,13 +75,12 @@ action:
           - condition: state
             entity_id: !input is_indirect
             state: "on"
-          # Verifica se `indirect_light` está definido e não está vazio
-          - condition: template
-            value_template: "{{ '!input indirect_light' != '' }}"
         sequence:
           - service: light.turn_on
             target:
-              entity_id: !input indirect_light
+              entity_id: 
+                - !input direct_light
+                - !input indirect_light
       - conditions:
           # Verifica se `is_indirect` está desativado
           - condition: state
@@ -97,17 +94,10 @@ action:
       - platform: state
         entity_id: !input motion_sensor
         to: "off"
-    timeout: !input no_motion_wait
-    continue_on_timeout: true
-  - choose:
-      - conditions:
-          # Verifica se `indirect_light` está configurado
-          - condition: template
-            value_template: "{{ '!input indirect_light' != '' }}"
-        sequence:
-          - service: light.turn_off
-            target:
-              entity_id: !input indirect_light
+        for: !input no_motion_wait
+    continue_on_timeout: false
   - service: light.turn_off
     target:
-      entity_id: !input direct_light
+      entity_id: 
+        - !input direct_light
+        - !input indirect_light
