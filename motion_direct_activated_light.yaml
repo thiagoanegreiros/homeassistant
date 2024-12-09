@@ -10,7 +10,7 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-          device_class: motion
+          multiple: false
     lux_sensor:
       name: Lux Sensor
       description: The sensor to measure illumination level for the light.
