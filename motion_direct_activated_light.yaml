@@ -74,7 +74,6 @@ action:
         entity_id: !input motion_sensor
         to: "off"
         for: !input no_motion_wait
-    continue_on_timeout: false
   - service: light.turn_off
     target:
       entity_id: !input direct_light
