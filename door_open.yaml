@@ -29,13 +29,13 @@ action:
   - service: notify.mobile_app_sm_s901e
     data:
       title: "Alerta: Sensor de Contato"
-      message: >
+      message: >-
         O sensor de contato {{ states[trigger.entity_id].attributes.friendly_name if trigger.entity_id else 'Desconhecido' }}
         permaneceu aberto por {{ !input.tempo_espera }} minutos.
   - service: notify.mobile_app_iphone_de_jacqueline
     data:
       title: "Alerta: Sensor de Contato"
-      message: >
+      message: >-
         O sensor de contato {{ states[trigger.entity_id].attributes.friendly_name if trigger.entity_id else 'Desconhecido' }}
         permaneceu aberto por {{ !input.tempo_espera }} minutos.
 
