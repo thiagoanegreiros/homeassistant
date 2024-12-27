@@ -20,30 +20,29 @@ blueprint:
     celulares:
       name: Escolha os celulares para receber a notificação
       selector:
-        device:
-          integration: mobile_app
+        target:
+          entity:
+            domain: notify
           multiple: true
 
 trigger:
   - platform: state
     entity_id: !input sensor_contato
-    to: "on"  # Estado do sensor para disparar o trigger (ajuste se necessário)
+    to: "on"
     for:
       minutes: !input tempo_espera
 
 action:
   - choose:
-      - conditions: 
+      - conditions:
           - condition: template
             value_template: "{{ trigger.to_state is not none }}"
         sequence:
           - repeat:
               for_each: !input celulares
               sequence:
-                - service: notify.mobile_app_{{ repeat.item }}
+                - service: "{{ repeat.item }}"
                   data:
-                    message: >
-                      O sensor de contato {{ trigger.entity_id }} permaneceu aberto por {{ states(trigger.entity_id).attributes.friendly_name if trigger.entity_id else 'Desconhecido' }}.
-                    title: "Alerta: Sensor de Contato"
-
-mode: single
+                    title: "Alerta de Vazamento"
+                    message: |
+                      Detectado vazamento em um dos sensores! Verifique o local imediatamente.
