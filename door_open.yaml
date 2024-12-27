@@ -25,14 +25,14 @@ trigger:
     for:
       minutes: !input tempo_espera
 
-actions:
-  - action: notify.mobile_app_sm_s901e
+action:
+  - service: notify.mobile_app_sm_s901e
     data:
       title: "Alerta: Sensor de Contato"
-      message: "teste"
-  - action: notify.mobile_app_iphone_de_jacqueline
+      message: "O sensor de contato está ativo por mais de {{ !input tempo_espera }} minutos."
+  - service: notify.mobile_app_iphone_de_jacqueline
     data:
       title: "Alerta: Sensor de Contato"
-      message: "teste"
+      message: "O sensor de contato está ativo por mais de {{ !input tempo_espera }} minutos."
 
 mode: single
