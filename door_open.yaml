@@ -11,7 +11,7 @@ blueprint:
     tempo_espera:
       name: Tempo de espera (em minutos)
       description: Quantos minutos o sensor deve permanecer no estado configurado antes de disparar o evento.
-      default: 15
+      default: 10
       selector:
         number:
           min: 1
@@ -27,18 +27,23 @@ blueprint:
 trigger:
   - platform: state
     entity_id: !input sensor_contato
-    to: "on"
+    to: "on"  # Estado do sensor para disparar o trigger (ajuste se necessário)
     for:
       minutes: !input tempo_espera
 
 action:
-  - service: notify.mobile_app
-    target:
-      device_id: !input celulares
-    data:
-      message: "O sensor de contato {{ trigger.entity_id }} permaneceu aberto por {{ !input tempo_espera }} minutos."
-      title: "Alerta: Sensor de Contato"
-  - delay:
-      seconds: 1
+  - choose:
+      - conditions: 
+          - condition: template
+            value_template: "{{ trigger.to_state is not none }}"
+        sequence:
+          - repeat:
+              for_each: !input celulares
+              sequence:
+                - service: notify.mobile_app_{{ repeat.item }}
+                  data:
+                    message: >
+                      O sensor de contato {{ trigger.entity_id }} permaneceu aberto por {{ states(trigger.entity_id).attributes.friendly_name if trigger.entity_id else 'Desconhecido' }}.
+                    title: "Alerta: Sensor de Contato"
 
 mode: single
