@@ -1,6 +1,6 @@
 blueprint:
   name: Monitorar Sensor de Contato
-  description: Monitora o estado de um sensor de contato e envia uma notificação após um tempo configurável.
+  description: Monitora o estado de um sensor de contato e envia uma notificação para dois celulares específicos após um tempo configurável.
   domain: automation
   input:
     sensor_contato:
@@ -11,19 +11,12 @@ blueprint:
     tempo_espera:
       name: Tempo de espera (em minutos)
       description: Quantos minutos o sensor deve permanecer no estado configurado antes de disparar o evento.
-      default: 10
+      default: 15
       selector:
         number:
           min: 1
           max: 60
           unit_of_measurement: min
-    celulares:
-      name: Escolha os celulares para receber a notificação
-      selector:
-        target:
-          entity:
-            domain: notify
-          multiple: true
 
 trigger:
   - platform: state
@@ -33,16 +26,17 @@ trigger:
       minutes: !input tempo_espera
 
 action:
-  - choose:
-      - conditions:
-          - condition: template
-            value_template: "{{ trigger.to_state is not none }}"
-        sequence:
-          - repeat:
-              for_each: !input celulares
-              sequence:
-                - service: "{{ repeat.item }}"
-                  data:
-                    title: "Alerta de Vazamento"
-                    message: |
-                      Detectado vazamento em um dos sensores! Verifique o local imediatamente.
+  - service: notify.mobile_app_sm_s901e
+    data:
+      title: "Alerta: Sensor de Contato"
+      message: >
+        O sensor de contato {{ states(trigger.entity_id).attributes.friendly_name if trigger.entity_id else 'Desconhecido' }}
+        permaneceu aberto por {{ !input tempo_espera }} minutos.
+  - service: notify.mobile_app_iphone_de_jacqueline
+    data:
+      title: "Alerta: Sensor de Contato"
+      message: >
+        O sensor de contato {{ states(trigger.entity_id).attributes.friendly_name if trigger.entity_id else 'Desconhecido' }}
+        permaneceu aberto por {{ !input tempo_espera }} minutos.
+
+mode: single
