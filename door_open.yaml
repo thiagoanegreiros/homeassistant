@@ -1,0 +1,44 @@
+blueprint:
+  name: Monitorar Sensor de Contato
+  description: Monitora o estado de um sensor de contato e envia uma notificação após um tempo configurável.
+  domain: automation
+  input:
+    sensor_contato:
+      name: Escolha o sensor de contato
+      selector:
+        entity:
+          domain: binary_sensor
+    tempo_espera:
+      name: Tempo de espera (em minutos)
+      description: Quantos minutos o sensor deve permanecer no estado configurado antes de disparar o evento.
+      default: 15
+      selector:
+        number:
+          min: 1
+          max: 60
+          unit_of_measurement: min
+    celulares:
+      name: Escolha os celulares para receber a notificação
+      selector:
+        device:
+          integration: mobile_app
+          multiple: true
+
+trigger:
+  - platform: state
+    entity_id: !input sensor_contato
+    to: "on"
+    for:
+      minutes: !input tempo_espera
+
+action:
+  - service: notify.mobile_app
+    target:
+      device_id: !input celulares
+    data:
+      message: "O sensor de contato {{ trigger.entity_id }} permaneceu aberto por {{ !input tempo_espera }} minutos."
+      title: "Alerta: Sensor de Contato"
+  - delay:
+      seconds: 1
+
+mode: single
